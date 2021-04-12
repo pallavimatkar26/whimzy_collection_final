@@ -7,6 +7,7 @@ import { ORDER_DELETE_RESET } from '../constants/orderConstants';
 import { Link } from 'react-router-dom';
 
 export default function OrderListScreen(props) {
+  // console.log(props.orders)
   const sellerMode = props.match.path.indexOf('/seller') >= 0;
   const orderList = useSelector((state) => state.orderList);
   const { loading, error, orders } = orderList;
@@ -32,7 +33,7 @@ export default function OrderListScreen(props) {
   return (
     <div>
       <h1>Orders</h1>
-      <Link className="historyMargin"to="/help/orders">Help</Link>
+      <Link className="historyMargin"to="/help/orders">Help</Link> 
       {loadingDelete && <LoadingBox></LoadingBox>}
       {errorDelete && <MessageBox variant="danger">{errorDelete}</MessageBox>}
       {loading ? (
