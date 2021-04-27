@@ -25,16 +25,19 @@ import {
 } from '../constants/orderConstants';
 
 export const createOrder = (order) => async (dispatch, getState) => {
+ 
   dispatch({ type: ORDER_CREATE_REQUEST, payload: order });
   try {
     const {
       userSignin: { userInfo },
     } = getState();
+    
     const { data } = await Axios.post('/api/orders', order, {
       headers: {
         Authorization: `Bearer ${userInfo.token}`,
       },
     });
+
     dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.order });
     dispatch({ type: CART_EMPTY });
     localStorage.removeItem('cartItems');
@@ -47,6 +50,7 @@ export const createOrder = (order) => async (dispatch, getState) => {
           : error.message,
     });
   }
+  
 };
 
 export const detailsOrder = (orderId) => async (dispatch, getState) => {
@@ -55,11 +59,14 @@ export const detailsOrder = (orderId) => async (dispatch, getState) => {
     userSignin: { userInfo },
   } = getState();
   try {
-    const { data } = await Axios.get(`/api/orders/${orderId}`, {
+    const { data } = await Axios.get(`/api/orders/${orderId}`, 
+    {
       headers: { Authorization: `Bearer ${userInfo.token}` },
     });
     dispatch({ type: ORDER_DETAILS_SUCCESS, payload: data });
-  } catch (error) {
+  } 
+
+  catch (error) {
     const message =
       error.response && error.response.data.message
         ? error.response.data.message

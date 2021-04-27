@@ -104,7 +104,7 @@ a.brand {
   font-weight: bold;
 }
 .imgStyle {
-  margin-left:-250px;
+  /* margin-left:-250px; */
 }
 .badge {
   background-color: #f02020;

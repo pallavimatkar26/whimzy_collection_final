@@ -1,6 +1,7 @@
 const express = require('express');
 const expressAsyncHandler = require('express-async-handler');
 const Order = require ('../models/orderModel');
+const Product = require('../models/productModel');
 
 const  {
   isAdmin,
@@ -74,14 +75,69 @@ orderRouter.get(
   })
 );
 
+
+
+// orderRouter.put(
+//   '/:id/pay',
+//   isAuth,
+//   expressAsyncHandler(async (req, res) => {
+//     const order = await Order.findById(req.params.id).populate(
+//       'user',
+//       'email name'
+//     );
+//     if (order) {
+//       order.isPaid = true;
+//       order.paidAt = Date.now();
+//       order.paymentResult = {
+//         id: req.body.id,
+//         status: req.body.status,
+//         update_time: req.body.update_time,
+//         email_address: req.body.email_address,
+//       };
+//       const updatedOrder = await order.save();
+//       for (const index in order.orderItems) {
+//         const item = order.orderItems[index];
+//         const product = await Product.findById(item.product);
+//         product.countInStock -= item.qty;
+//         console.log(product.countInStock);
+//         product.sold += item.qty;
+//         product.transactions.push({
+//           user: req.user._id,
+//           qty: -item.qty,
+//           transactionType: 'SOLD',
+//           description: `sold to ${req.user.name} on order ${updatedOrder._id}`,
+//         });
+//         await product.save({ session });
+//       }
+//       mailgun()
+//         .messages()
+//         .send(
+//           {
+//             from: 'whimzy <whimzy@mg.yourdomain.com>',
+//             to: `${order.user.name} <${order.user.email}>`,
+//             subject: `New order ${order._id}`,
+//             html: payOrderEmailTemplate(order),
+//           },
+//           (error, body) => {
+//             if (error) {
+//               console.log(error);
+//             } else {
+//               console.log(body);
+//             }
+//           }
+//         );
+//       res.send({ message: 'Order Paid', order: updatedOrder });
+//     } else {
+//       res.status(404).send({ message: 'Order Not Found' });
+//     }
+//   })
+// );
+
 orderRouter.put(
   '/:id/pay',
   isAuth,
   expressAsyncHandler(async (req, res) => {
-    const order = await Order.findById(req.params.id).populate(
-      'user',
-      'email name'
-    );
+    const order = await Order.findById(req.params.id);
     if (order) {
       order.isPaid = true;
       order.paidAt = Date.now();
@@ -92,23 +148,16 @@ orderRouter.put(
         email_address: req.body.email_address,
       };
       const updatedOrder = await order.save();
-      mailgun()
-        .messages()
-        .send(
-          {
-            from: 'whimzy <whimzy@mg.yourdomain.com>',
-            to: `${order.user.name} <${order.user.email}>`,
-            subject: `New order ${order._id}`,
-            html: payOrderEmailTemplate(order),
-          },
-          (error, body) => {
-            if (error) {
-              console.log(error);
-            } else {
-              console.log(body);
-            }
-          }
-        );
+      console.log(updatedOrder);
+      for (const index in updatedOrder.orderItems) {
+        const item = updatedOrder.orderItems[index];
+        console.log(item)
+        const product = await Product.findById(item.product);
+        // console.log(product);
+        product.countInStock -= item.qty;
+        product.sold += item.qty;      
+        await product.save();
+      }
       res.send({ message: 'Order Paid', order: updatedOrder });
     } else {
       res.status(404).send({ message: 'Order Not Found' });
